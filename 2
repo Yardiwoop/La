@@ -1,0 +1,70 @@
+#include <iostream>
+#include <string>
+
+
+using namespace std;
+
+
+
+class Exam {
+private:
+	string name;
+	int mark;
+	int id;
+public:
+	Exam() : name("Evgeniy MM"), id(rand() % 1000), mark(0) {} // особая инициализация членов класса
+	Exam(string n, int m, int i) {
+		name = n;
+		mark = m;
+		id = i;
+	}
+	~Exam() {}
+	friend void printStudent(Exam obj);
+	friend class ExamMan;
+	void rename(string& word) {
+		name = word;
+	}
+};
+
+
+class ExamMan {
+public:
+	void setMark(Exam& obj, int miss) {
+		obj.mark = miss;
+	}
+};
+
+void printStudent(Exam obj) {
+	cout << obj.id << ". " << obj.name << " - mark: " << obj.mark << endl;
+
+}
+
+int main() {
+	ExamMan teacher;
+	Exam obj1;
+	printStudent(obj1);
+	Exam obj2("Petr Petrov", 5, 5);
+	printStudent(obj2);
+	int miss, id;
+	string name;
+	cout << "Enter the name" << endl;
+	getline (cin, name); 
+	cout << "Enter the id" << endl;
+	cin >> id;
+	cout << "Enter the mark" << endl;
+	cin >> miss;
+	if (miss < 0 || id < 0) {
+		cout << "Bad input" << endl;
+		return 0;
+	}
+	Exam obj3(name, miss, id);
+	printStudent(obj3);
+	teacher.setMark(obj1, 5);
+	teacher.setMark(obj2, 6);
+	teacher.setMark(obj3, 7);
+	printStudent(obj1);
+	printStudent(obj2);
+	printStudent(obj3);
+
+	return 0;
+}

@@ -1,0 +1,313 @@
+#include <iostream>
+#include<string>
+using namespace std;
+
+class Exam
+{
+private:
+	int id;
+	string name;
+	int mark;
+	static int a;
+public:
+	Exam(string nm, int m) : name(nm), mark(m)
+	{
+		id = a;
+		a++;
+	}
+	Exam()
+	{
+		id = 0;
+		a++;
+		name = "-";
+		mark = 0;
+	}
+	void input()
+	{
+		cout << "\nEnter name" << endl;
+		getline(cin, name);
+		cout << "\nEnter mark" << endl;
+		cin >> mark;
+
+	}
+	void output()
+	{
+		cout << "\nId - " << id << "  Name - " << name << "  Mark - " << mark << endl;
+	}
+	bool operator< (Exam& c2) const
+	{
+		return (name[0] < c2.name[0]) ? true : false;
+	}
+	bool operator> (Exam& c2) const
+	{
+		return (name[0] > c2.name[0]) ? true : false;
+	}
+	bool operator== (Exam& c2) const
+	{
+		return (name[0] == c2.name[0]) ? true : false;
+	}
+	friend ostream& operator<<(ostream& out, const Exam c);
+};
+int Exam::a = 1;
+ostream& operator<<(ostream& out, const Exam c)
+{
+	out << "\nId - " << c.id << "  Name - " << c.name << "  Mark - " << c.mark << endl;
+	return out;
+}
+
+class Exception
+{
+};
+
+
+void myterminate()
+{
+	cerr << "\nTerminate handler called" << endl;
+	abort();
+}
+void myunexpected()
+{
+	cerr << "\nUnexpected exception" << endl;
+	terminate();
+}
+
+
+template <typename T>
+class  Node
+{
+public:
+	T data;
+	Node* next;
+	Node() : data(), next(nullptr) { }
+	Node(T d) : data(d), next(nullptr) { }
+};
+
+
+template<class T>
+class Slist
+{
+private:
+	Node<T>* head,*tail;
+	int size;
+public:
+	Slist() :head(nullptr),tail(nullptr), size(0) {}
+	void push(T x)
+	{
+		
+		if (head == nullptr)
+		{
+			Node<T>* p = new Node<T>(x);
+			tail = new Node<T>(x);
+			p->next = tail;
+			head=tail = p;
+			size++;
+		}
+		else
+		{
+			Node<T>* tmp = tail;
+			int i = 0;
+			while (i < size - 1)
+			{
+				tmp = tmp->next;
+				i++;
+			}
+			tmp->next = new Node<T>(x);
+			tmp->next->next = tail;
+			size++;
+		}
+	}
+
+	void pop()
+	{
+		if (size == 0)
+			throw Exception();
+		Node<T>* tmp = head;
+		head = head->next;
+		delete tmp;
+		size--;
+		Node<T>* t = head;
+		int i = 0;
+		while (i < size - 1)
+		{
+			t = t->next;
+			i++;
+		}
+		t->next = head;
+	}
+	void output()
+	{
+		if (size == 0)
+			throw Exception();
+		Node<T>* tmp = head;
+		int i = 0;
+		while (i < size)
+		{
+			cout << "   " << tmp->data;
+			tmp = tmp->next;
+			i++;
+		}
+	}
+	Node<T>* get_node() {
+		return head;
+	}
+	int get_size() {
+		return size;
+	}
+	friend ostream& operator<<(ostream& out, const Node<T>& node);
+};
+
+template<class T>
+class Iterator
+{
+private:
+	Node<T>* node;
+	int size;
+	int actual;
+public:
+	friend Slist<T>;
+	Iterator(Slist<T>* element) : actual(0)
+	{
+		node = element->get_node();
+		size = element->get_size();
+	}
+	void begin()
+	{
+		if (size == 0)
+			throw Exception();
+		if (actual != 0)
+		{
+			while (actual < size)
+			{
+				actual++;
+				node = node->next;
+			}
+			actual = 0;
+		}
+
+	}
+	void search(T x)
+	{
+		if (size == 0)
+			throw Exception();
+		int i = 0;
+		while (i < size)
+		{
+			if (x == node->data)
+			{
+				cout << "\nElement\n " << x << "\nfound" << endl;
+				return;
+			}
+			if (actual == size - 1)
+				actual = 0;
+			else
+				actual++;
+			node = node->next;
+			i++;
+		}
+		cout << "\nElement\n " << x << " \nnot found" << endl;
+	}
+	Iterator& operator++()
+	{
+		if (size == 0)
+			throw Exception();
+		if (size == 1)
+			actual = 0;
+		else
+			actual++;
+		node = node->next;
+		return *this;
+	}
+	T operator*() {
+		return node->data;
+	}
+	void operator = (T x)
+	{
+		if (size == 0)
+			throw Exception();
+		node->data = x;
+	}
+	Iterator& operator[](int index)
+	{
+		if (size == 0)
+			throw Exception();
+		Node<T>* tmp = node;
+		while (1)
+		{
+			if (actual == index)
+			{
+				node = tmp;
+				return *this;
+			}
+			tmp = tmp->next;
+			if (actual == size - 1)
+				actual = 0;
+			else
+				actual++;
+		}
+	}
+	void shell()
+	{
+		if (size == 0)
+			throw Exception();
+		int step, i, j;
+		for (step = size / 2; step > 0; step /= 2)
+			for (i = step; i < size; i++)
+				for (j = i - step; j >= 0 && (*this)[j].node->data >(*this)[j + step].node->data; j -= step)
+				{
+					Exam tmp = (*this)[j].node->data;
+					(*this)[j].node->data = (*this)[j + step].node->data;
+					(*this)[j + step].node->data = tmp;
+				}
+	}
+};
+
+
+
+int main()
+{
+	set_terminate(myterminate);
+	set_unexpected(myunexpected);
+	Slist<Exam> slist;
+	try
+	{
+		slist.output();
+	}
+	catch (Exception)
+	{
+		cerr << "\nThe slist is empty\n";
+	}
+	cout << "\n-----------------------------------------------------------------------------------\n";
+	slist.push(Exam("Evgen", 0));
+	Exam s2("Yar", 10);
+	slist.push(s2);
+	slist.push(Exam("Stas", 9));
+	Exam s4("Petro", 6);
+	slist.push(s4);
+	slist.push(Exam("Simon", 2));
+	try
+	{
+		slist.output();
+		cout << "\n-----------------------------------------------------------------------------------\n";
+		Iterator<Exam> I(&slist);
+		cout << "\nSortirovka po imenam" << endl;
+		cout << "\n-----------------------------------------------------------------------------------\n";
+		I.begin();
+		I.shell();
+		slist.output();
+		cout << "\n-----------------------------------------------------------------------------------\n";
+		slist.pop();
+		slist.output();
+		cout << "\n-----------------------------------------------------------------------------------\n";
+		slist.pop();
+		slist.output();
+		cout << "\n-----------------------------------------------------------------------------------\n";
+		I.begin();
+		I.search(s4);
+		I.search(s2);
+	}
+	catch (Exception)
+	{
+		cerr << "\nThe slist is empty\n";
+	}
+
+}
